@@ -1,0 +1,168 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<script src="js/img_lib.js"></script>
+<SCRIPT language="JavaScript">
+  let all = [];
+</SCRIPT>
+<script src="js/all_src.js"></script>
+<script src="js/img_src.js"></script>
+</head>
+
+<body class="">
+
+<div style="position:absolute; top:0px; left:0px;display:flex;">
+  <img class="main_img fixed" src="js/noH.png" id="main" name="0" alt=""/>
+  <img class="main_img fixed opacity" src="js/noH.png" id="main2" name="0" 
+      onclick="forward_main()" alt=""/>
+  <span class="main_index" id="main_index" alt=""></span>
+  <div class="thumbnail_area" id='thumbnail'></div>
+</div>
+
+<div style="position:fixed; top:5px; right:10px;z-index: 4;" id="opacity_area">
+  <input type="number" id="opacity" style="width:45px" step="0.1" value="0.4"/>
+  <button type="button" onclick="set_opacity()">半透明</button>
+</div>
+
+</body>
+
+<SCRIPT language="JavaScript">
+  let main_num = getRandomInt(Object.keys(img_src).length);
+  let main_now = Object.keys(img_src)[main_num];
+  let main_src = img_src[main_now];
+  const set_main = (key=main_now) => {
+    main_num = Object.keys(img_src).indexOf(key);
+    main_now = key;
+    main_src = img_src[key];
+    img_same(main_src, document.getElementById('main'), document.getElementById(key).name);
+    img_same(main_src, document.getElementById('main2'), document.getElementById(key).name);
+    img_forward(main_src, document.getElementById('main2'));
+    document.getElementById('main_index').innerText = main_num + ' ' + (Number(document.getElementById(key).name)+1) + '/' + main_src.length;
+  }
+  
+  const forward_main = () => {
+    if( Number(document.getElementById(main_now).name) == img_src[main_now].length-1 ){
+      img_reset(img_src[main_now],document.getElementById(main_now));
+      set_main(Object.keys(img_src)[main_num+1]);
+    } else {
+      img_forward(img_src[main_now],document.getElementById(main_now));
+      set_main(main_now);
+    }
+  }
+  const backward_main = () => {
+    if( Number(document.getElementById(main_now).name) == 0 ){
+      img_reset(img_src[main_now],document.getElementById(main_now));
+      set_main(Object.keys(img_src)[main_num-1]);
+    } else {
+      img_backward(img_src[main_now],document.getElementById(main_now));
+      set_main(main_now);
+    }
+  }
+
+  const thumbnail_click = (key) => {
+    main_num = Object.keys(img_src).indexOf(key);
+    if(main_now==key) img_forward(img_src[key],document.getElementById(key));
+    set_main(key);
+  }
+  const create_thumbnail = () => {
+    let thumbnail_html = '';
+    Object.keys(img_src).forEach((key=>{
+      thumbnail_html = thumbnail_html + `<div>`;
+      thumbnail_html = thumbnail_html + `<img class="thumbnail" src='${img_src[key][0]}' id='${key}' name="0" onclick="thumbnail_click('${key}')" />`;
+      thumbnail_html = thumbnail_html + `<p class="thumbnail_page" >${img_src[key].length}</p>`;
+      thumbnail_html = thumbnail_html + `</div>`;
+    }))
+    document.getElementById('thumbnail').innerHTML=thumbnail_html;
+  }
+
+  let opacity_flag = true;
+  const set_opacity = () => {
+    document.getElementById('main2').style.opacity = opacity_flag ? document.getElementById('opacity').value : 0;
+    document.getElementById('opacity').innerText = opacity_flag ? '透明' : '半透明';
+    opacity_flag = !opacity_flag;
+  }
+  window.onload = ()=>{create_thumbnail();set_main();}
+
+  // key-bind
+  const main_big = () => {
+    document.getElementById('main').style.maxWidth='100vw';
+    document.getElementById('main2').style.maxWidth='100vw';
+  }
+  const main_small = () => {
+    document.getElementById('main').style.maxWidth='40vw';
+    document.getElementById('main2').style.maxWidth='40vw';
+  }
+  let button_flag = true;
+  const button_delete = () => {
+    if (button_flag) {
+      document.getElementById('opacity_area').style.opacity=0;
+      document.getElementById('main_index').style.opacity=0;
+    } else {
+      document.getElementById('opacity_area').style.opacity=1;
+      document.getElementById('main_index').style.opacity=1;
+    }
+    button_flag = button_flag ? false : true ;
+  }
+  document.addEventListener("keydown", function (evnt) {
+    if (evnt.key == 'ArrowLeft') { backward_main();}
+    else if (evnt.key  == 'ArrowRight') { forward_main();}
+    else if (evnt.key  == 'a') { backward_main();}
+    else if (evnt.key  == 'd') { forward_main();}
+    else if (evnt.key  == 'w') { set_main(Object.keys(img_src)[main_num+1]);}
+    else if (evnt.key  == 's') { set_main(Object.keys(img_src)[main_num-1]);}
+    else if (evnt.key  == 'r') { set_main(Object.keys(img_src)[getRandomInt(Object.keys(img_src).length)]);}
+    else if (evnt.key  == 'q') { main_big();}
+    else if (evnt.key  == 'e') { main_small();}
+    else if (evnt.key  == 'f') { button_delete();}
+  });
+</SCRIPT>
+
+<style>
+  .main_img{
+    max-height: 100vh;
+    max-width: 40vw;
+    image-rendering: -webkit-optimize-contrast;
+  }
+  .main_index{
+    font-size: 2rem;
+    position: fixed;
+    right:0.5rem;
+    bottom:0;
+    z-index: 3;
+    -webkit-text-stroke: 1px #fff;
+  }
+  .thumbnail_area{
+    width:63vw;
+    position:relative;
+    top:0px;
+    left:0vw;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .thumbnail{
+    max-height: 22vh;
+    margin: 0 3px 3px 0;
+    image-rendering: -webkit-optimize-contrast;
+  }
+  .thumbnail_page{
+    position:relative; 
+    right:-10px; 
+    bottom: 20px; 
+    margin: 0px; 
+    line-height:0; 
+    width:0;
+    font-size: 1.5rem;
+    color: #000;
+    -webkit-text-stroke: 1px #fff;
+  }
+  .fixed{
+    position: fixed;
+    right:0;
+    z-index: 2;
+  }
+  .opacity{
+    opacity:0;
+    z-index: 3;
+  }
+</style>
+
+</html>

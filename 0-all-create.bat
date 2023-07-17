@@ -1,0 +1,1 @@
+node js/all-create.js
